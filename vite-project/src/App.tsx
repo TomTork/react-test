@@ -66,17 +66,23 @@ function App() {
               <Offcanvas.Title>Сортировка</Offcanvas.Title>
             </Offcanvas.Header>
             <Offcanvas.Body>
+              <h5>Отсортируйте список доступной литературы:</h5>
               <FormGroup>
                 <FormControlLabel className="d-flex justify-content-between" control={<Android12Switch />}
                   style={{ display: "flex", justifyContent: "end", paddingRight: 20, paddingTop: 10 }}
-                  label="Рассказы" value="end" labelPlacement="start" />
+                  label={<span style={{ fontSize: 20 }}>Рассказы</span>} value="end" labelPlacement="start" />
                 <FormControlLabel className="d-flex justify-content-between" control={<Android12Switch />}
                   style={{ display: "flex", justifyContent: "end", paddingRight: 20, paddingTop: 10 }}
-                  label="Статьи" value="end" labelPlacement="start" />
+                  label={<span style={{ fontSize: 20 }}>Статьи</span>} value="end" labelPlacement="start" />
                 <FormControlLabel className="d-flex justify-content-between" control={<Android12Switch />}
                   style={{ display: "flex", justifyContent: "end", paddingRight: 20, paddingTop: 10 }}
-                  label="Поэмы" value="end" labelPlacement="start" />
+                  label={<span style={{ fontSize: 20 }}>Поэмы</span>} value="end" labelPlacement="start" />
               </FormGroup>
+              <Button style={{
+                display: "flex", justifyContent: "center"
+              }}>
+                <a>Применить</a>
+              </Button>
             </Offcanvas.Body>
           </Offcanvas>
         </Nav.Item>
