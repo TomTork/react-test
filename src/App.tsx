@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 // import Alert from "./components/Alert";
 // import Button from "./components/Button";
 import Offcanvas from "react-bootstrap/Offcanvas";
@@ -15,12 +15,13 @@ import heartImage from "./assets/heart.svg";
 import FormGroup from '@mui/material/FormGroup';
 import FormControlLabel from '@mui/material/FormControlLabel';
 import Android12Switch from "./components/SwitchC";
-import Switch, { SwitchProps } from '@mui/material/Switch';
+// import Switch, { SwitchProps } from '@mui/material/Switch';
 // import Switch from 'antd';
-import { CheckOutlined, CloseOutlined } from '@ant-design/icons';
+// import { CheckOutlined, CloseOutlined } from '@ant-design/icons';
+import Client from "./server/Client";
+import { IRequest } from "./server/Client";
 
-
-function SplitMassive(mas: string[]) {
+function SplitMassive(mas: any[]) {
   const objMas = [];
   for (let i = 0; i < mas.length; i += 3) {
     objMas.push(mas.slice(i, i + 3));
@@ -28,6 +29,9 @@ function SplitMassive(mas: string[]) {
   return objMas;
 }
 
+function sortByTime(mas: IRequest[]) {
+  return mas.sort((a, b) => a.date_release.localeCompare(b.date_release)).reverse();
+}
 
 function App() {
   const [show, setShow] = useState(false);
@@ -48,9 +52,24 @@ function App() {
   const [statesIndex, setStatesIndex] = useState(Array);
   const handleStatesIndex = (i: number[]) => { setStatesIndex(i) };
 
-  const mas = SplitMassive(
-    ["First", "Second", "Third", "Fourth", "Fifth", "Sixth", "Seventh", "Nineth"]);
-  const title = "Пока что приглашаю вас почитать оригинал: https://www.sakharov.space/lib/mir-cherez-polveka (Мир через полвека). Особенно обращаю ваше внимание на Рабочую Территорию и Заповедную Территорию. С видинием общества с автором категорически не согласен, тем интереснее наблюдать срез эпохи, то как видели мир в прошлом (статья за 1974 г.)";
+  const client = new Client();
+  const [mas, setData] = useState(Array);
+
+  useEffect(() => {
+    async function fetchData() {
+      try {
+        const stories2 = await client.getAllData("stories2");
+        const poems2 = await client.getAllData("poems2");
+        const articles2 = await client.getAllData("articles2");
+        const data = sortByTime(stories2.concat(poems2).concat(articles2));
+        setData(SplitMassive(data));
+      } catch (error) {
+        console.log('ERROR: ' + error);
+      }
+    }
+    fetchData();
+  }, []);
+
   return <>
     <Navbar expand="lg" style={{ backgroundColor: "rgba(215, 236, 255, 1)" }}>
       <Nav className="container-fluid">
@@ -101,21 +120,21 @@ function App() {
 
     <Container>
       {
-        mas.map((item, index) => (
+        mas.map((item: any, index: number) => (
           <Row>
             {
-              item.map((itemIn, indexIn) => (
+              item.map((itemIn: IRequest, indexIn: number) => (
                 <Col>
                   <Card className="mt-4">
                     <Card.Img variant="top" src={testImage} />
                     <Card.Body>
-                      <Card.Title><h3>{itemIn}</h3></Card.Title>
-                      <Card.Text>{title}</Card.Text>
+                      <Card.Title><h3>{itemIn.Label}</h3></Card.Title>
+                      <Card.Text>{itemIn.Base.substring(0, 512) + "..."}</Card.Text>
                       <ButtonGroup style={{
                         position: "relative", justifyContent: "right", alignItems: 'right'
                       }}>
                         <Button className="center"
-                          key={index.toString() + indexIn.toString()}
+                          key={"share" + index.toString() + indexIn.toString()}
                           onClick={() => { console.log("share " + Number(index.toString() + indexIn.toString()) + " " + colorShareIndex) }}
                           style={{
                             backgroundColor: (colorShareIndex === Number(index.toString() + indexIn.toString()) ? "rgba(164, 212, 255, 0.5)" : "rgba(164, 212, 255, 1)"),
@@ -125,7 +144,7 @@ function App() {
                           <img src={shareImage} width={20} height={20} />
                         </Button>
                         <Button className="center"
-                          key={index.toString() + indexIn.toString()}
+                          key={"like" + index.toString() + indexIn.toString()}
                           onClick={() => { console.log("like " + Number(index.toString() + indexIn.toString())) }}
                           style={{
                             backgroundColor: (colorHeartIndex === Number(index.toString() + indexIn.toString()) ? "rgba(164, 212, 255, 0.5)" : "rgba(164, 212, 255, 1)"),
@@ -157,16 +176,6 @@ function App() {
       </p>&nbsp;
 
     </h5>
-
-    {/* <div className="p-3 mb-2 bg-primary text-white">
-      <span className="border-top">
-        {alertVisible && <Alert onClose={() => setAlertVisibility(false)}>Alert!</Alert>}
-        <Button color="secondary" onClick={() => setAlertVisibility(true)}>My Button</Button>
-      </span>
-
-    </div> */}
-
-
   </>
 
 }
