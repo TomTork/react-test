@@ -1,9 +1,6 @@
 import { useState, useEffect } from "react";
-// import Alert from "./components/Alert";
-// import Button from "./components/Button";
 import Offcanvas from "react-bootstrap/Offcanvas";
 import Button from "react-bootstrap/Button";
-// import ListGroup from "./components/ListGroup";
 import { ButtonGroup, Card, Container, Nav, Navbar } from "react-bootstrap";
 import menuImage from "./assets/menu.svg";
 import searchImage from "./assets/search.svg";
@@ -15,9 +12,6 @@ import heartImage from "./assets/heart.svg";
 import FormGroup from '@mui/material/FormGroup';
 import FormControlLabel from '@mui/material/FormControlLabel';
 import Android12Switch from "./components/SwitchC";
-// import Switch, { SwitchProps } from '@mui/material/Switch';
-// import Switch from 'antd';
-// import { CheckOutlined, CloseOutlined } from '@ant-design/icons';
 import Client from "./server/Client";
 import { IRequest } from "./server/Client";
 
@@ -34,6 +28,7 @@ function sortByTime(mas: IRequest[]) {
 }
 
 function App() {
+  document.title = "Том Торк";
   const [show, setShow] = useState(false);
 
   const handleClose = () => setShow(false);
