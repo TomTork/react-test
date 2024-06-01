@@ -13,7 +13,9 @@ import FormGroup from '@mui/material/FormGroup';
 import FormControlLabel from '@mui/material/FormControlLabel';
 import Android12Switch from "./components/SwitchC";
 import Client from "./server/Client";
-import { IRequest } from "./server/Client";
+import IRequest from "./interfaces/IterfaceIRequest";
+import { useNavigate } from "react-router-dom";
+import Cookies from 'js-cookie';
 
 function SplitMassive(mas: any[]) {
   const objMas = [];
@@ -49,6 +51,8 @@ function App() {
 
   const client = new Client();
   const [mas, setData] = useState(Array);
+
+  const navigate = useNavigate();
 
   useEffect(() => {
     async function fetchData() {
@@ -122,7 +126,14 @@ function App() {
                 <Col>
                   <Card className="mt-4">
                     <Card.Img variant="top" src={testImage} />
-                    <Card.Body>
+                    <Card.Body onClick={() => {
+                      Cookies.set('label', itemIn.Label);
+                      Cookies.set('base', itemIn.Base);
+                      Cookies.set('likes', itemIn.likes.toString());
+                      Cookies.set('date_release', itemIn.date_release);
+                      Cookies.set('updatedAt', itemIn.updatedAt);
+                      navigate('/text', { replace: true });
+                    }}>
                       <Card.Title><h3>{itemIn.Label}</h3></Card.Title>
                       <Card.Text>{itemIn.Base.substring(0, 512) + "..."}</Card.Text>
                       <ButtonGroup style={{

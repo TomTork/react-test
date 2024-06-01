@@ -1,13 +1,4 @@
-export interface IRequest {
-    Label: string,
-    createdAt: string,
-    updatedAt: string,
-    publishedAt: string,
-    Base: string,
-    likes: number,
-    users_likes?: string,
-    date_release: string
-}
+import IRequest from "../interfaces/IterfaceIRequest";
 
 class Client {
     token: string = "b51b8cc2eb6b9dcdf16c26153cd79a3420a36ab8f45121800c01f4621806b5a6125850f5563dd524c5b5bba9941d18604a8d66f390833bd98b01f7c851fc970d79b15a5e3ea91731a7c0ce34926c9c4dfbdfe5263d0b5fdd7d8b1ebd03b77ef8b3dd025a2b5c494b5235814595f853163258e0e5ba6cf97de66f3e798ec08227";
