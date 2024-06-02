@@ -16,28 +16,22 @@ import Client from "./server/Client";
 import IRequest from "./interfaces/IterfaceIRequest";
 import { useNavigate } from "react-router-dom";
 import Cookies from 'js-cookie';
-
-function SplitMassive(mas: any[]) {
-  const objMas = [];
-  for (let i = 0; i < mas.length; i += 3) {
-    objMas.push(mas.slice(i, i + 3));
-  }
-  return objMas;
-}
-
-function sortByTime(mas: IRequest[]) {
-  return mas.sort((a, b) => a.date_release.localeCompare(b.date_release)).reverse();
-}
+import ServerHelper from "./components/HelperForServer";
+import { v4 as uuidv4 } from 'uuid';
+import { TextField } from "@mui/material";
 
 function App() {
   document.title = "Том Торк";
+  if (!Cookies.get('token')) { //token for new user
+    Cookies.set('token', uuidv4());
+  }
+  else console.log(Cookies.get('token'));
+
+  const serverHelper = new ServerHelper();
   const [show, setShow] = useState(false);
 
   const handleClose = () => setShow(false);
   const handleShow = () => setShow(true);
-
-  const [showSearch, setShowSearch] = useState(false);
-  const handleSearch = (x: boolean) => { setShowSearch(!x) };
 
   const [colorShareIndex, setColorShareIndex] = useState(-1);
   const handleColorShareIndex = (i: number) => { setColorShareIndex(i) };
@@ -52,30 +46,26 @@ function App() {
   const client = new Client();
   const [mas, setData] = useState(Array);
 
+  const [searchInput, setSearchInput] = useState('');
+  const handleSearchInput = (x: string) => { setSearchInput(x) };
+  const [showSearch, setShowSearch] = useState(false);
+  const handleSearch = (x: boolean) => { setShowSearch(!x) };
+
   const navigate = useNavigate();
 
+  const [rawData, setRawData] = useState(Array);
+
   useEffect(() => {
-    async function fetchData() {
-      try {
-        const stories2 = await client.getAllData("stories2");
-        const poems2 = await client.getAllData("poems2");
-        const articles2 = await client.getAllData("articles2");
-        const data = sortByTime(stories2.concat(poems2).concat(articles2));
-        setData(SplitMassive(data));
-      } catch (error) {
-        console.log('ERROR: ' + error);
-      }
-    }
-    fetchData();
-  }, []);
+    serverHelper.fetchData(client, setRawData, setData, rawData);
+  })
 
   return <>
     <Navbar expand="lg" style={{ backgroundColor: "rgba(215, 236, 255, 1)" }}>
       <Nav className="container-fluid">
-        <Nav.Item style={{ paddingLeft: 10 }}>
+        <Nav.Item className="ml-auto" style={{ paddingLeft: 10 }}>
           <Button onClick={handleShow} style={{
             margin: 1,
-            backgroundColor: "rgba(164, 212, 255, 1)",
+            backgroundColor: "rgba(164, 212, 255, 1)"
           }}>
             <img src={menuImage} width={30} height={30} />
           </Button>
@@ -105,12 +95,26 @@ function App() {
           </Offcanvas>
         </Nav.Item>
         <Nav.Item>
-          <p className="text-start; fs-2" style={{ paddingLeft: 15, margin: 1, fontFamily: 'serif' }}>
+          <p className="text-start; fs-2" style={{ paddingLeft: 260, margin: 1, fontFamily: 'serif' }}>
             Том Торк — рассказы, стихи и статьи
           </p>
         </Nav.Item>
         <Nav.Item className="ml-auto">
-          <Button onClick={() => { handleSearch(showSearch) }} style={{ backgroundColor: "rgba(164, 212, 255, 1)" }}>
+          {<TextField className="content-wrapper"
+            value={searchInput}
+            style={{
+              visibility: showSearch ? 'visible' : 'hidden',
+              paddingRight: 20, marginBottom: 10
+            }}
+            onChange={
+              (event: React.ChangeEvent<HTMLInputElement>) => {
+                setSearchInput(event.target.value);
+                if (searchInput != "") setData(serverHelper.sortBySearch(rawData, searchInput));
+
+              }} />
+          }
+          <Button onClick={() => { handleSearch(showSearch) }}
+            style={{ backgroundColor: "rgba(164, 212, 255, 1)", margin: 1 }}>
             <img src={searchImage} width={30} height={30} />
           </Button>
         </Nav.Item>
@@ -128,11 +132,11 @@ function App() {
                     <Card.Img variant="top" src={testImage} />
                     <Card.Body onClick={() => {
                       Cookies.set('label', itemIn.Label);
-                      Cookies.set('base', itemIn.Base);
+                      Cookies.set('id', (index * 3 + indexIn).toString());
                       Cookies.set('likes', itemIn.likes.toString());
                       Cookies.set('date_release', itemIn.date_release);
                       Cookies.set('updatedAt', itemIn.updatedAt);
-                      navigate('/text', { replace: true });
+                      navigate('/text' + "/?id=" + Cookies.get('id'), { replace: true });
                     }}>
                       <Card.Title><h3>{itemIn.Label}</h3></Card.Title>
                       <Card.Text>{itemIn.Base.substring(0, 512) + "..."}</Card.Text>
