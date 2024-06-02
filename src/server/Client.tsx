@@ -7,7 +7,7 @@ class Client {
         headers.set('Content-Type', 'application/json');
         headers.set('Accept', 'application/json');
         headers.set('Authorization', 'Bearer ' + this.token);
-        const request: RequestInfo = new Request("http://localhost:1337/api/" + url, {
+        const request: RequestInfo = new Request("http://localhost:1337/api/" + url + '?populate=*', {
             method: 'GET',
             headers: headers
         });
@@ -17,6 +17,7 @@ class Client {
         for (let i = 0; i < data.length; i++) {
             mas.push((data[i]["attributes"] as IRequest));
         }
+        console.log(mas[0].Image['data']);
         return mas;
     }
 }

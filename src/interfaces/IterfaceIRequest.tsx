@@ -6,7 +6,8 @@ interface IRequest {
     Base: string,
     likes: number,
     users_likes?: string,
-    date_release: string
+    date_release: string,
+    Image: any
 }
 
 export default IRequest;

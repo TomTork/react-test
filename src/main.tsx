@@ -7,10 +7,8 @@ import TextPage from './components/TextPage.tsx';
 ReactDOM.createRoot(document.getElementById('root')!).render(
   <BrowserRouter>
     <Routes>
-      <Route path="/">
-        <Route path="/text" element={<TextPage />} />
-        <Route path="/" element={<App />} />
-      </Route>
+      <Route path="/text" element={<TextPage />} />
+      <Route path="/" element={<App />} />
     </Routes>
   </BrowserRouter>
 )
