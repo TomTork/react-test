@@ -7,6 +7,7 @@ import { useNavigate } from "react-router-dom";
 // import Cookies from 'js-cookie';
 import ServerHelper from "./HelperForServer";
 import Client from '../server/Client';
+import ImageRequest from "../interfaces/InterfaceImageRequest";
 
 function TextPage() {
     console.log(window.location.search.substring(4));
@@ -19,7 +20,8 @@ function TextPage() {
         Label: "", createdAt: "",
         updatedAt: "", publishedAt: "",
         Base: "", likes: -1,
-        users_likes: "", date_release: ""
+        users_likes: "", date_release: "",
+        Image: ""
     } as IRequest);
 
     useEffect(() => {
@@ -44,13 +46,6 @@ function TextPage() {
         }
         fetchData();
     }, []);
-    // let req: IRequest = {
-    //     Label: Cookies.get('label'), createdAt: "",
-    //     updatedAt: Cookies.get('updatedAt'), publishedAt: "",
-    //     Base: mas,
-    //     likes: Number(Cookies.get('likes')),
-    //     users_likes: "", date_release: Cookies.get('date_release')
-    // } as IRequest;
     document.title = req.Label;
     const navigate = useNavigate();
     return <div>
@@ -67,6 +62,12 @@ function TextPage() {
             </Nav>
         </Navbar>
         <Container>
+            <img width={600}
+                style={{
+                    paddingLeft: 20, paddingRight: 20, paddingTop: 10,
+                    borderRadius: 30, borderWidth: 10, paddingBottom: 10
+                }}
+                src={req.Image["data"] != null ? "http://localhost:1337" + (req.Image["data"][0]["attributes"] as ImageRequest).url : ""} />
             <h2 style={{ paddingLeft: 20, paddingRight: 20 }}>{req.Label}</h2>
             <h4 style={{ padding: 20, whiteSpace: 'pre-wrap' }}>{req.Base}</h4>
             <h5 style={{ paddingLeft: 20, paddingRight: 20 }}>{req.date_release}</h5>

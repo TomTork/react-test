@@ -1,4 +1,5 @@
 import IRequest from "../interfaces/IterfaceIRequest";
+import Client from "../server/Client";
 
 class ServerHelper {
     sortByTime(mas: IRequest[]) {
@@ -22,7 +23,8 @@ class ServerHelper {
         }
         return this.SplitMassive(massive);
     }
-    async fetchData(client: any, setRawData: any, setData: any, rawData: any) {
+    async fetchData(setRawData: any, setData: any, rawData: any) {
+        const client = new Client();
         try {
             const stories2 = await client.getAllData("stories2");
             const poems2 = await client.getAllData("poems2");
@@ -30,7 +32,7 @@ class ServerHelper {
             setRawData(this.sortByTime(stories2.concat(poems2).concat(articles2)));
             setData(this.SplitMassive(rawData));
         } catch (error) {
-            console.log('ERROR: ' + error);
+            console.log('MY-ERROR: ' + error);
         }
     }
 }

@@ -4,7 +4,7 @@ import Button from "react-bootstrap/Button";
 import { ButtonGroup, Card, Container, Nav, Navbar } from "react-bootstrap";
 import menuImage from "./assets/menu.svg";
 import searchImage from "./assets/search.svg";
-import testImage from "./assets/test.jpg";
+// import testImage from "./assets/test.jpg";
 import Row from 'react-bootstrap/Row';
 import Col from 'react-bootstrap/Col';
 import shareImage from "./assets/share.svg";
@@ -20,10 +20,12 @@ import ServerHelper from "./components/HelperForServer";
 import { v4 as uuidv4 } from 'uuid';
 import { TextField } from "@mui/material";
 import cancelImage from './assets/cancel.svg';
+import ImageRequest from "./interfaces/InterfaceImageRequest";
 
+//ПЕРЕВЕСТИ ВСЮ ИНФОРМАЦИЮ В ОДНУ ТАБЛИЦУ, ПРОБЛЕМА С ID
 function App() {
-  let flag = true;
   const serverHelper = new ServerHelper();
+  const client = new Client();
   const [show, setShow] = useState(false);
   const handleClose = () => setShow(false);
   const handleShow = () => setShow(true);
@@ -31,16 +33,17 @@ function App() {
   const handleColorShareIndex = (i: number) => { setColorShareIndex(i) };
   const [colorHeartIndex, setColorHeartIndex] = useState(-1);
   const handleColorHeartIndex = (i: number) => { setColorHeartIndex(i) };
-  //states: stories([0]), poems([1]), articles([2]), books([3]), all([])
-  const [statesIndex, setStatesIndex] = useState(Array);
-  const handleStatesIndex = (i: number[]) => { setStatesIndex(i) };
-  const client = new Client();
   const [mas, setData] = useState(Array);
   const [searchInput, setSearchInput] = useState('');
-  const handleSearchInput = (x: string) => { setSearchInput(x) };
+  // const handleSearchInput = (x: string) => { setSearchInput(x) };
   const [showSearch, setShowSearch] = useState(false);
   const handleSearch = (x: boolean) => { setShowSearch(!x) };
-  const [rawData, setRawData] = useState(Array);
+  const [updateSort, setUpdateSort] = useState(true);
+
+  let rawData: IRequest[] = [];
+  let chStories = false;
+  let chArticles = false;
+  let chPoems = false;
 
   // throw ExceptionMap;
   document.title = "Том Торк";
@@ -51,15 +54,38 @@ function App() {
 
   const navigate = useNavigate();
 
-  if (flag) {
-    flag = !flag;
-    useEffect(() => {
-      serverHelper.fetchData(client, setRawData, setData, rawData);
-    })
-  }
-  console.log(rawData);
+  useEffect(() => {
+    async function fetchData() {
+      if (updateSort) {
+        try {
+          const stories2 = await client.getAllData("stories2");
+          const poems2 = await client.getAllData("poems2");
+          const articles2 = await client.getAllData("articles2");
+          if (!chArticles && !chStories && !chPoems) {
+            rawData = serverHelper.sortByTime(stories2.concat(poems2).concat(articles2));
+            setData(serverHelper.SplitMassive(rawData));
+          }
+          else {
+            const massive: IRequest[] = [];
+            if (chArticles) massive.concat(articles2);
+            if (chPoems) massive.concat(poems2);
+            if (chStories) massive.concat(stories2);
+            setData(serverHelper.SplitMassive(massive));
+          }
+          setUpdateSort(false);
 
-  return <>
+        } catch (error) {
+          console.log('MY-ERROR: ' + error);
+        }
+      }
+
+
+    }
+    fetchData();
+  }, []);
+
+
+  return <div>
     <Navbar expand="lg" style={{ backgroundColor: "rgba(215, 236, 255, 1)" }}>
       <Nav className="container-fluid">
         <Nav.Item className="ml-auto" style={{ paddingLeft: 10 }}>
@@ -76,19 +102,22 @@ function App() {
             <Offcanvas.Body>
               <h5>Отсортируйте список доступной литературы:</h5>
               <FormGroup>
-                <FormControlLabel className="d-flex justify-content-between" control={<Android12Switch />}
+                <FormControlLabel onClick={() => { chStories = !chStories }}
+                  className="d-flex justify-content-between" control={<Android12Switch />}
                   style={{ display: "flex", justifyContent: "end", paddingRight: 20, paddingTop: 10 }}
                   label={<span style={{ fontSize: 20 }}>Рассказы</span>} value="end" labelPlacement="start" />
-                <FormControlLabel className="d-flex justify-content-between" control={<Android12Switch />}
+                <FormControlLabel onClick={() => { chArticles = !chArticles }}
+                  className="d-flex justify-content-between" control={<Android12Switch />}
                   style={{ display: "flex", justifyContent: "end", paddingRight: 20, paddingTop: 10 }}
                   label={<span style={{ fontSize: 20 }}>Статьи</span>} value="end" labelPlacement="start" />
-                <FormControlLabel className="d-flex justify-content-between" control={<Android12Switch />}
+                <FormControlLabel onClick={() => { chPoems = !chPoems }}
+                  className="d-flex justify-content-between" control={<Android12Switch />}
                   style={{ display: "flex", justifyContent: "end", paddingRight: 20, paddingTop: 10 }}
                   label={<span style={{ fontSize: 20 }}>Поэмы</span>} value="end" labelPlacement="start" />
               </FormGroup>
               <Button style={{
                 display: "flex", justifyContent: "center"
-              }}>
+              }} onClick={() => { setShow(false); setUpdateSort(true) }}>
                 <a>Применить</a>
               </Button>
             </Offcanvas.Body>
@@ -150,7 +179,7 @@ function App() {
               item.map((itemIn: IRequest, indexIn: number) => (
                 <Col>
                   <Card className="mt-4">
-                    <Card.Img variant="top" src={testImage} />
+                    <Card.Img variant="top" src={itemIn.Image["data"] != null ? "http://localhost:1337" + (itemIn.Image["data"][0]["attributes"] as ImageRequest).url : ""} />
                     <Card.Body>
                       <Card.Title><h3>{itemIn.Label}</h3></Card.Title>
                       <Card.Text
@@ -210,7 +239,7 @@ function App() {
       </p>&nbsp;
 
     </h5>
-  </>
+  </div>
 
 }
 
