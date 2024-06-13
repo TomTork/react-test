@@ -22,6 +22,7 @@ import { TextField } from "@mui/material";
 import cancelImage from './assets/cancel.svg';
 import ImageRequest from "./interfaces/InterfaceImageRequest";
 
+//ПРОВЕРКА МИГРАЦИИ
 //ПЕРЕВЕСТИ ВСЮ ИНФОРМАЦИЮ В ОДНУ ТАБЛИЦУ, ПРОБЛЕМА С ID
 function App() {
   const serverHelper = new ServerHelper();
