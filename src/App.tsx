@@ -35,16 +35,17 @@ function App() {
   const [colorHeartIndex, setColorHeartIndex] = useState(-1);
   const handleColorHeartIndex = (i: number) => { setColorHeartIndex(i) };
   const [mas, setData] = useState(Array);
+  const [globalMas, setGlobalMas] = useState(Array)
   const [searchInput, setSearchInput] = useState('');
   // const handleSearchInput = (x: string) => { setSearchInput(x) };
   const [showSearch, setShowSearch] = useState(false);
   const handleSearch = (x: boolean) => { setShowSearch(!x) };
-  const [updateSort, setUpdateSort] = useState(true);
+  const [updateSort, setUpdateSort] = useState(false);
 
   let rawData: IRequest[] = [];
-  let chStories = false;
-  let chArticles = false;
-  let chPoems = false;
+  const [chStories, setChS] = useState(false);
+  const [chArticles, setChA] = useState(false);
+  const [chPoems, setChP] = useState(false);
 
   // throw ExceptionMap;
   document.title = "Том Торк";
@@ -54,35 +55,38 @@ function App() {
   else console.log(Cookies.get('token'));
 
   const navigate = useNavigate();
+  let massive: IRequest[] = [];
+
+  if(updateSort){
+    massive = [];
+    console.log('create' + " " + chArticles + " " + chPoems + " " + chStories);
+    console.log(globalMas);
+    if(chArticles) massive.concat(serverHelper.sortByType(2, globalMas as IRequest[]));
+    if(chPoems) massive.concat(serverHelper.sortByType(0, globalMas as IRequest[]));
+    if(chStories) massive.concat(serverHelper.sortByType(1, globalMas as IRequest[]));
+    console.log(massive);
+    setData(massive);
+    mas.map((x: any) => {
+      x.map((y: IRequest) => {
+        console.log(y);
+      })
+    })
+    console.log(mas);
+    setUpdateSort(false);
+
+  }
 
   useEffect(() => {
     async function fetchData() {
-      if (updateSort) {
-        try {
-          const content = await client.getAllData();
-          console.log(content);
-          // const stories2 = await client.getAllData("stories2");
-          // const poems2 = await client.getAllData("poems2");
-          // const articles2 = await client.getAllData("articles2");
-          if (!chArticles && !chStories && !chPoems) {
-            rawData = serverHelper.sortByTime(content);
-            setData(serverHelper.SplitMassive(rawData));
-          }
-          else {
-            // const massive: IRequest[] = [];
-            // if (chArticles) massive.concat(articles2);
-            // if (chPoems) massive.concat(poems2);
-            // if (chStories) massive.concat(stories2);
-            // setData(serverHelper.SplitMassive(massive));
-          }
-          setUpdateSort(false);
-
-        } catch (error) {
-          console.log('MY-ERROR: ' + error);
-        }
+      try {
+        const content = await client.getAllData();
+        console.log(content);
+        rawData = serverHelper.sortByTime(content);
+        setGlobalMas(rawData)
+        setData(serverHelper.SplitMassive(rawData));
+      } catch (error) {
+        console.log('MY-ERROR: ' + error);
       }
-
-
     }
     fetchData();
   }, []);
@@ -105,15 +109,15 @@ function App() {
             <Offcanvas.Body>
               <h5>Отсортируйте список доступной литературы:</h5>
               <FormGroup>
-                <FormControlLabel onClick={() => { chStories = !chStories }}
+                <FormControlLabel checked={chStories} onClick={() => { setChS(!chStories) }}
                   className="d-flex justify-content-between" control={<Android12Switch />}
                   style={{ display: "flex", justifyContent: "end", paddingRight: 20, paddingTop: 10 }}
                   label={<span style={{ fontSize: 20 }}>Рассказы</span>} value="end" labelPlacement="start" />
-                <FormControlLabel onClick={() => { chArticles = !chArticles }}
+                <FormControlLabel checked={chArticles} onClick={() => { setChA(!chArticles) }}
                   className="d-flex justify-content-between" control={<Android12Switch />}
                   style={{ display: "flex", justifyContent: "end", paddingRight: 20, paddingTop: 10 }}
                   label={<span style={{ fontSize: 20 }}>Статьи</span>} value="end" labelPlacement="start" />
-                <FormControlLabel onClick={() => { chPoems = !chPoems }}
+                <FormControlLabel checked={chPoems} onClick={() => { setChP(!chPoems) }}
                   className="d-flex justify-content-between" control={<Android12Switch />}
                   style={{ display: "flex", justifyContent: "end", paddingRight: 20, paddingTop: 10 }}
                   label={<span style={{ fontSize: 20 }}>Поэмы</span>} value="end" labelPlacement="start" />

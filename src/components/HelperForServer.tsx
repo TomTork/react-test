@@ -12,6 +12,9 @@ class ServerHelper {
         }
         return objMas;
     }
+    sortByType(type: number, mas: IRequest[]){
+        return mas.filter((x) => x.type === type)
+    }
     sortBySearch(mas: any, query: string) {
         const massive = [];
         for (let i = 0; i < mas.length; i++) {

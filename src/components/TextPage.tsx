@@ -4,13 +4,13 @@ import BackImage from "../assets/back.svg";
 import Button from "react-bootstrap/Button";
 import IRequest from "../interfaces/IterfaceIRequest";
 import { useNavigate } from "react-router-dom";
-// import Cookies from 'js-cookie';
 import ServerHelper from "./HelperForServer";
 import Client from '../server/Client';
 import ImageRequest from "../interfaces/InterfaceImageRequest";
 import ReactQuill from "react-quill"
 import 'react-quill/dist/quill.snow.css'
 import Markdown from "react-markdown";
+import myStyle from '../markdown-style.module.css'
 
 function TextPage() {
     console.log(window.location.search.substring(4));
@@ -75,11 +75,9 @@ function TextPage() {
                     borderRadius: 30, borderWidth: 10, paddingBottom: 10
                 }}
                 src={req.images["data"] != null ? "http://localhost:1337" + (req.images["data"][0]["attributes"] as ImageRequest).url : ""} />
-            <h2 style={{ paddingLeft: 20, paddingRight: 20 }}>{req.label}</h2>
-            
-            <Markdown 
+            <h2 style={{ paddingLeft: 20, paddingRight: 20, fontWeight: 'bold', fontSize: 50 }}>{req.label}</h2>
+            <Markdown className={myStyle.reactMarkDown}
                 children={req.base}/>
-            {/* <h4 style={{ padding: 20, whiteSpace: 'pre-wrap' }}><p>{req.base}</p></h4> */}
             <h5 style={{ paddingLeft: 20, paddingRight: 20 }}>{req.release_date}</h5>
             <h5 style={{ paddingLeft: 20, paddingRight: 20 }}>{req.likes}</h5>
             <h5 style={{ paddingLeft: 20, paddingRight: 20 }}>{req.updatedAt ? "Дата последнего изменения:" : ""} {req.updatedAt}</h5>
