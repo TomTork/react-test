@@ -1,13 +1,15 @@
 interface IRequest {
-    Label: string,
+    label: string,
+    base: string,
+    likes: number,
+    release_date: string,
+    type: number,
     createdAt: string,
     updatedAt: string,
     publishedAt: string,
-    Base: string,
-    likes: number,
-    users_likes?: string,
-    date_release: string,
-    Image: any
+    users_like: string,
+    images: any
 }
+//0 - poems, 1 - stories, 2 - articles
 
 export default IRequest;

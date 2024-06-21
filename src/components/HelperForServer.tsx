@@ -3,7 +3,7 @@ import Client from "../server/Client";
 
 class ServerHelper {
     sortByTime(mas: IRequest[]) {
-        return mas.sort((a, b) => a.date_release.localeCompare(b.date_release)).reverse();
+        return mas.sort((a, b) => a.release_date.localeCompare(b.release_date)).reverse();
     }
     SplitMassive(mas: any[]) {
         const objMas = [];
@@ -26,10 +26,8 @@ class ServerHelper {
     async fetchData(setRawData: any, setData: any, rawData: any) {
         const client = new Client();
         try {
-            const stories2 = await client.getAllData("stories2");
-            const poems2 = await client.getAllData("poems2");
-            const articles2 = await client.getAllData("articles2");
-            setRawData(this.sortByTime(stories2.concat(poems2).concat(articles2)));
+            const content = await client.getAllData();
+            setRawData(this.sortByTime(content));
             setData(this.SplitMassive(rawData));
         } catch (error) {
             console.log('MY-ERROR: ' + error);

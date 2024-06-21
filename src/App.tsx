@@ -59,19 +59,21 @@ function App() {
     async function fetchData() {
       if (updateSort) {
         try {
-          const stories2 = await client.getAllData("stories2");
-          const poems2 = await client.getAllData("poems2");
-          const articles2 = await client.getAllData("articles2");
+          const content = await client.getAllData();
+          console.log(content);
+          // const stories2 = await client.getAllData("stories2");
+          // const poems2 = await client.getAllData("poems2");
+          // const articles2 = await client.getAllData("articles2");
           if (!chArticles && !chStories && !chPoems) {
-            rawData = serverHelper.sortByTime(stories2.concat(poems2).concat(articles2));
+            rawData = serverHelper.sortByTime(content);
             setData(serverHelper.SplitMassive(rawData));
           }
           else {
-            const massive: IRequest[] = [];
-            if (chArticles) massive.concat(articles2);
-            if (chPoems) massive.concat(poems2);
-            if (chStories) massive.concat(stories2);
-            setData(serverHelper.SplitMassive(massive));
+            // const massive: IRequest[] = [];
+            // if (chArticles) massive.concat(articles2);
+            // if (chPoems) massive.concat(poems2);
+            // if (chStories) massive.concat(stories2);
+            // setData(serverHelper.SplitMassive(massive));
           }
           setUpdateSort(false);
 
@@ -180,20 +182,20 @@ function App() {
               item.map((itemIn: IRequest, indexIn: number) => (
                 <Col>
                   <Card className="mt-4">
-                    <Card.Img variant="top" src={itemIn.Image["data"] != null ? "http://localhost:1337" + (itemIn.Image["data"][0]["attributes"] as ImageRequest).url : ""} />
+                    <Card.Img variant="top" src={itemIn.images["data"] != null ? "http://localhost:1337" + (itemIn.images["data"][0]["attributes"] as ImageRequest).url : ""} />
                     <Card.Body>
-                      <Card.Title><h3>{itemIn.Label}</h3></Card.Title>
+                      <Card.Title><h3>{itemIn.label}</h3></Card.Title>
                       <Card.Text
                         onClick={() => {
-                          Cookies.set('label', itemIn.Label);
+                          Cookies.set('label', itemIn.label);
                           Cookies.set('id', (index * 3 + indexIn).toString());
                           Cookies.set('likes', itemIn.likes.toString());
-                          Cookies.set('date_release', itemIn.date_release);
+                          Cookies.set('date_release', itemIn.release_date);
                           Cookies.set('updatedAt', itemIn.updatedAt);
                           navigate('/text' + "/?id=" + Cookies.get('id'), { replace: true });
                         }}
                         style={{ whiteSpace: 'pre-wrap' }}>
-                        {itemIn.Base.substring(0, 512) + "..."}</Card.Text>
+                        {itemIn.base.substring(0, 512) + "..."}</Card.Text>
                       <ButtonGroup style={{
                         position: "relative", justifyContent: "right", alignItems: 'right'
                       }}>

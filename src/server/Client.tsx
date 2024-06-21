@@ -1,8 +1,8 @@
 import IRequest from "../interfaces/IterfaceIRequest";
 
 class Client {
-    token: string = "b51b8cc2eb6b9dcdf16c26153cd79a3420a36ab8f45121800c01f4621806b5a6125850f5563dd524c5b5bba9941d18604a8d66f390833bd98b01f7c851fc970d79b15a5e3ea91731a7c0ce34926c9c4dfbdfe5263d0b5fdd7d8b1ebd03b77ef8b3dd025a2b5c494b5235814595f853163258e0e5ba6cf97de66f3e798ec08227";
-    async getAllData(url: string = "stories2") {
+    token: string = "e19b0a1847fc19072500888e4f536ef0bb60a5c384ceba6d9344a6743bca28363326a85642a38a5b8eb16c87c59779bfdc284fad7968a1702aac1a3eebebe8df94362039c61e956804a1810e1cce66abebfe58321bc414f92f331d012be6f8e51c9f809bf0840f9c57d5c613ca60e465b570b5ee712e5725c3c85140a5c549c6";
+    async getAllData(url: string = "contents") {
         const headers = new Headers();
         headers.set('Content-Type', 'application/json');
         headers.set('Accept', 'application/json');
@@ -17,7 +17,7 @@ class Client {
         for (let i = 0; i < data.length; i++) {
             mas.push((data[i]["attributes"] as IRequest));
         }
-        console.log(mas[0].Image['data']);
+        console.log(mas[0].images['data']);
         return mas;
     }
 }
