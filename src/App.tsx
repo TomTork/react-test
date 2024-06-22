@@ -4,7 +4,6 @@ import Button from "react-bootstrap/Button";
 import { ButtonGroup, Card, Container, Nav, Navbar } from "react-bootstrap";
 import menuImage from "./assets/menu.svg";
 import searchImage from "./assets/search.svg";
-// import testImage from "./assets/test.jpg";
 import Row from 'react-bootstrap/Row';
 import Col from 'react-bootstrap/Col';
 import shareImage from "./assets/share.svg";
@@ -21,9 +20,9 @@ import { v4 as uuidv4 } from 'uuid';
 import { TextField } from "@mui/material";
 import cancelImage from './assets/cancel.svg';
 import ImageRequest from "./interfaces/InterfaceImageRequest";
+import Markdown from "react-markdown";
+import myStyle from './markdown-style.module.css';
 
-//ПРОВЕРКА МИГРАЦИИ
-//ПЕРЕВЕСТИ ВСЮ ИНФОРМАЦИЮ В ОДНУ ТАБЛИЦУ, ПРОБЛЕМА С ID
 function App() {
   const serverHelper = new ServerHelper();
   const client = new Client();
@@ -64,7 +63,6 @@ function App() {
     if(chArticles) massive.concat(serverHelper.sortByType(2, globalMas as IRequest[]));
     if(chPoems) massive.concat(serverHelper.sortByType(0, globalMas as IRequest[]));
     if(chStories) massive.concat(serverHelper.sortByType(1, globalMas as IRequest[]));
-    console.log(massive);
     setData(massive);
     mas.map((x: any) => {
       x.map((y: IRequest) => {
@@ -104,34 +102,35 @@ function App() {
           </Button>
           <Offcanvas show={show} onHide={handleClose}>
             <Offcanvas.Header closeButton>
-              <Offcanvas.Title>Сортировка</Offcanvas.Title>
+              <Offcanvas.Title style={{ fontWeight: "bold", fontSize: 25, marginLeft: 10 }}>Сортировка</Offcanvas.Title>
             </Offcanvas.Header>
             <Offcanvas.Body>
-              <h5>Отсортируйте список доступной литературы:</h5>
+              <h5 style = {{ marginLeft: 10, marginTop: 10, fontSize: 20 }}>Отсортируйте список доступной литературы:</h5>
               <FormGroup>
                 <FormControlLabel checked={chStories} onClick={() => { setChS(!chStories) }}
                   className="d-flex justify-content-between" control={<Android12Switch />}
                   style={{ display: "flex", justifyContent: "end", paddingRight: 20, paddingTop: 10 }}
-                  label={<span style={{ fontSize: 20 }}>Рассказы</span>} value="end" labelPlacement="start" />
+                  label={<span style={{ fontSize: 20, fontStyle: 'oblique' }}>Рассказы</span>} value="end" labelPlacement="start" />
                 <FormControlLabel checked={chArticles} onClick={() => { setChA(!chArticles) }}
                   className="d-flex justify-content-between" control={<Android12Switch />}
                   style={{ display: "flex", justifyContent: "end", paddingRight: 20, paddingTop: 10 }}
-                  label={<span style={{ fontSize: 20 }}>Статьи</span>} value="end" labelPlacement="start" />
+                  label={<span style={{ fontSize: 20, fontStyle: 'oblique' }}>Статьи</span>} value="end" labelPlacement="start" />
                 <FormControlLabel checked={chPoems} onClick={() => { setChP(!chPoems) }}
                   className="d-flex justify-content-between" control={<Android12Switch />}
                   style={{ display: "flex", justifyContent: "end", paddingRight: 20, paddingTop: 10 }}
-                  label={<span style={{ fontSize: 20 }}>Поэмы</span>} value="end" labelPlacement="start" />
+                  label={<span style={{ fontSize: 20, fontStyle: 'oblique' }}>Поэмы</span>} value="end" labelPlacement="start" />
               </FormGroup>
               <Button style={{
-                display: "flex", justifyContent: "center"
+                display: "flex", justifyContent: "center", backgroundColor: "rgba(164, 212, 255, 1)", 
+                borderColor: "rgba(0, 0, 0)", marginLeft: 10, marginTop: 10
               }} onClick={() => { setShow(false); setUpdateSort(true) }}>
-                <a>Применить</a>
+                <a style={{color: "rgba(0, 0, 0)"}}>Применить</a>
               </Button>
             </Offcanvas.Body>
           </Offcanvas>
         </Nav.Item>
         <Nav.Item>
-          <p className="text-start; fs-2" style={{ paddingLeft: 260, margin: 1, fontFamily: 'serif' }}>
+          <p className="text-start; fs-2" style={{ paddingLeft: 260, margin: 1, fontFamily: 'fantasy' }}>
             Том Торк — рассказы, стихи и статьи
           </p>
         </Nav.Item>
@@ -145,8 +144,8 @@ function App() {
             onChange={
               (event: React.ChangeEvent<HTMLInputElement>) => {
                 setSearchInput(event.target.value);
-                if (searchInput != "") setData(serverHelper.sortBySearch(rawData, searchInput));
-
+                if (searchInput != "") setData(serverHelper.sortBySearch(globalMas as IRequest[], searchInput));
+                else setData(serverHelper.SplitMassive(globalMas));
               }}
             InputProps={{
               endAdornment: (
@@ -185,34 +184,22 @@ function App() {
             {
               item.map((itemIn: IRequest, indexIn: number) => (
                 <Col>
-                  <Card className="mt-4">
+                  <Card className="mt-4" style={{height: 350}}>
                     <Card.Img variant="top" src={itemIn.images["data"] != null ? "http://localhost:1337" + (itemIn.images["data"][0]["attributes"] as ImageRequest).url : ""} />
                     <Card.Body>
-                      <Card.Title><h3>{itemIn.label}</h3></Card.Title>
+                      <Card.Title style={{paddingLeft: 20}}><h3>{serverHelper.toTypeValue(itemIn.label)}</h3></Card.Title>
                       <Card.Text
                         onClick={() => {
-                          Cookies.set('label', itemIn.label);
                           Cookies.set('id', (index * 3 + indexIn).toString());
-                          Cookies.set('likes', itemIn.likes.toString());
-                          Cookies.set('date_release', itemIn.release_date);
-                          Cookies.set('updatedAt', itemIn.updatedAt);
                           navigate('/text' + "/?id=" + Cookies.get('id'), { replace: true });
                         }}
                         style={{ whiteSpace: 'pre-wrap' }}>
-                        {itemIn.base.substring(0, 512) + "..."}</Card.Text>
+                        <Markdown className={myStyle.reactMarkDown} children={serverHelper.toTypeContent(itemIn.base) + "..."}/></Card.Text>
                       <ButtonGroup style={{
-                        position: "relative", justifyContent: "right", alignItems: 'right'
+                        position: "absolute", justifyContent: "right", alignItems: 'right',
+                        offsetPosition: "auto", bottom: 10, paddingLeft: 20
                       }}>
-                        <Button className="center"
-                          key={"share" + index.toString() + indexIn.toString()}
-                          onClick={() => { console.log("share " + Number(index.toString() + indexIn.toString()) + " " + colorShareIndex) }}
-                          style={{
-                            backgroundColor: (colorShareIndex === Number(index.toString() + indexIn.toString()) ? "rgba(164, 212, 255, 0.5)" : "rgba(164, 212, 255, 1)"),
-                            borderColor: "rgba(0, 0, 0)"
-                          }} onMouseEnter={() => { handleColorShareIndex(Number(index.toString() + indexIn.toString())) }}
-                          onMouseLeave={() => { handleColorShareIndex(-1) }}>
-                          <img src={shareImage} width={20} height={20} />
-                        </Button>
+                        
                         <Button className="center"
                           key={"like" + index.toString() + indexIn.toString()}
                           onClick={() => { console.log("like " + Number(index.toString() + indexIn.toString())) }}
@@ -223,6 +210,16 @@ function App() {
                           onMouseEnter={() => { handleColorHeartIndex(Number(index.toString() + indexIn.toString())) }}
                           onMouseLeave={() => { handleColorHeartIndex(-1) }}>
                           <img src={heartImage} width={20} height={20} />
+                        </Button>
+                        <Button className="center"
+                          key={"share" + index.toString() + indexIn.toString()}
+                          onClick={() => { console.log("share " + Number(index.toString() + indexIn.toString()) + " " + colorShareIndex) }}
+                          style={{
+                            backgroundColor: (colorShareIndex === Number(index.toString() + indexIn.toString()) ? "rgba(164, 212, 255, 0.5)" : "rgba(164, 212, 255, 1)"),
+                            borderColor: "rgba(0, 0, 0)"
+                          }} onMouseEnter={() => { handleColorShareIndex(Number(index.toString() + indexIn.toString())) }}
+                          onMouseLeave={() => { handleColorShareIndex(-1) }}>
+                          <img src={shareImage} width={20} height={20} />
                         </Button>
                       </ButtonGroup>
                     </Card.Body>
