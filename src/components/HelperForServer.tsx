@@ -51,7 +51,7 @@ class ServerHelper {
 
     toTypeContent(content: string){
         if(countOccurrences(content, '\n') <= 16) return content;
-        return content.substring(0, this.findIndex(content));
+        return content.substring(0, this.findIndex(content)).substring(0, 256);
     }
 }
 

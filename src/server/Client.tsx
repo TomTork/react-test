@@ -17,7 +17,38 @@ class Client {
         for (let i = 0; i < data.length; i++) {
             mas.push((data[i]["attributes"] as IRequest));
         }
-        console.log(mas[0].images['data']);
+        return mas;
+    }
+    async getFromId(id: number){
+        const headers = new Headers();
+        headers.set('Content-Type', 'application/json');
+        headers.set('Accept', 'application/json');
+        headers.set('Authorization', 'Bearer ' + this.token);
+        const request: RequestInfo = new Request("http://localhost:1337/api/contents?filters[id][$in]=" + (id + 1).toString(), {
+            method: 'GET',
+            headers: headers
+        });
+        const { data, errors } = await (await fetch(request)).json();
+        if (!errors) console.log(errors);
+        return data[0]["attributes"] as IRequest;
+    }
+    async getAllFromType(type: number){
+        console.log(type);
+        const headers = new Headers();
+        headers.set('Content-Type', 'application/json');
+        headers.set('Accept', 'application/json');
+        headers.set('Authorization', 'Bearer ' + this.token);
+        const request: RequestInfo = new Request("http://localhost:1337/api/contents?populate=*&filters[type][$in]=" + type.toString(), {
+            method: 'GET',
+            headers: headers
+        });
+        const { data, errors } = await (await fetch(request)).json();
+        if (!errors) console.log(errors);
+        let mas: IRequest[] = new Array();
+        for (let i = 0; i < data.length; i++) {
+            mas.push((data[i]["attributes"] as IRequest));
+        }
+        console.log(mas);
         return mas;
     }
 }

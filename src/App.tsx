@@ -46,7 +46,6 @@ function App() {
   const [chArticles, setChA] = useState(false);
   const [chPoems, setChP] = useState(false);
 
-  // throw ExceptionMap;
   document.title = "Том Торк";
   if (!Cookies.get('token')) { //token for new user
     Cookies.set('token', uuidv4());
@@ -54,24 +53,18 @@ function App() {
   else console.log(Cookies.get('token'));
 
   const navigate = useNavigate();
-  let massive: IRequest[] = [];
 
   if(updateSort){
-    massive = [];
-    console.log('create' + " " + chArticles + " " + chPoems + " " + chStories);
-    console.log(globalMas);
-    if(chArticles) massive.concat(serverHelper.sortByType(2, globalMas as IRequest[]));
-    if(chPoems) massive.concat(serverHelper.sortByType(0, globalMas as IRequest[]));
-    if(chStories) massive.concat(serverHelper.sortByType(1, globalMas as IRequest[]));
-    setData(massive);
-    mas.map((x: any) => {
-      x.map((y: IRequest) => {
-        console.log(y);
-      })
-    })
-    console.log(mas);
-    setUpdateSort(false);
-
+    useEffect(() => {
+      async function fetchData2() {
+        console.log('start!');
+        if(chPoems) setData(serverHelper.SplitMassive(await client.getAllFromType(0)));
+        if(chStories) setData(serverHelper.SplitMassive(await client.getAllFromType(1)));
+        if(chArticles) setData(serverHelper.SplitMassive(await client.getAllFromType(2)));  
+        setUpdateSort(false);
+      }
+      fetchData2();
+    }, []);
   }
 
   useEffect(() => {
@@ -107,15 +100,15 @@ function App() {
             <Offcanvas.Body>
               <h5 style = {{ marginLeft: 10, marginTop: 10, fontSize: 20 }}>Отсортируйте список доступной литературы:</h5>
               <FormGroup>
-                <FormControlLabel checked={chStories} onClick={() => { setChS(!chStories) }}
+                <FormControlLabel checked={chStories} onClick={() => { setChS(!chStories); setChA(false); setChP(false) }}
                   className="d-flex justify-content-between" control={<Android12Switch />}
                   style={{ display: "flex", justifyContent: "end", paddingRight: 20, paddingTop: 10 }}
                   label={<span style={{ fontSize: 20, fontStyle: 'oblique' }}>Рассказы</span>} value="end" labelPlacement="start" />
-                <FormControlLabel checked={chArticles} onClick={() => { setChA(!chArticles) }}
+                <FormControlLabel checked={chArticles} onClick={() => { setChA(!chArticles); setChP(false); setChS(false) }}
                   className="d-flex justify-content-between" control={<Android12Switch />}
                   style={{ display: "flex", justifyContent: "end", paddingRight: 20, paddingTop: 10 }}
                   label={<span style={{ fontSize: 20, fontStyle: 'oblique' }}>Статьи</span>} value="end" labelPlacement="start" />
-                <FormControlLabel checked={chPoems} onClick={() => { setChP(!chPoems) }}
+                <FormControlLabel checked={chPoems} onClick={() => { setChP(!chPoems); setChS(false); setChA(false) }}
                   className="d-flex justify-content-between" control={<Android12Switch />}
                   style={{ display: "flex", justifyContent: "end", paddingRight: 20, paddingTop: 10 }}
                   label={<span style={{ fontSize: 20, fontStyle: 'oblique' }}>Поэмы</span>} value="end" labelPlacement="start" />
@@ -194,14 +187,15 @@ function App() {
                           navigate('/text' + "/?id=" + Cookies.get('id'), { replace: true });
                         }}
                         style={{ whiteSpace: 'pre-wrap' }}>
-                        <Markdown className={myStyle.reactMarkDown} children={serverHelper.toTypeContent(itemIn.base) + "..."}/></Card.Text>
+                        <Markdown className={myStyle.reactMarkDown} children={serverHelper.toTypeContent(itemIn.base) + "..."}/>
+                        </Card.Text>
                       <ButtonGroup style={{
                         position: "absolute", justifyContent: "right", alignItems: 'right',
                         offsetPosition: "auto", bottom: 10, paddingLeft: 20
                       }}>
                         
                         <Button className="center"
-                          key={"like" + index.toString() + indexIn.toString()}
+                          key={"like" + Number(index.toString() + indexIn.toString())}
                           onClick={() => { console.log("like " + Number(index.toString() + indexIn.toString())) }}
                           style={{
                             backgroundColor: (colorHeartIndex === Number(index.toString() + indexIn.toString()) ? "rgba(164, 212, 255, 0.5)" : "rgba(164, 212, 255, 1)"),
@@ -212,7 +206,7 @@ function App() {
                           <img src={heartImage} width={20} height={20} />
                         </Button>
                         <Button className="center"
-                          key={"share" + index.toString() + indexIn.toString()}
+                          key={"share" + Number(index.toString() + indexIn.toString())}
                           onClick={() => { console.log("share " + Number(index.toString() + indexIn.toString()) + " " + colorShareIndex) }}
                           style={{
                             backgroundColor: (colorShareIndex === Number(index.toString() + indexIn.toString()) ? "rgba(164, 212, 255, 0.5)" : "rgba(164, 212, 255, 1)"),

@@ -7,16 +7,15 @@ import { useNavigate } from "react-router-dom";
 import ServerHelper from "./HelperForServer";
 import Client from '../server/Client';
 import ImageRequest from "../interfaces/InterfaceImageRequest";
-import ReactQuill from "react-quill"
 import 'react-quill/dist/quill.snow.css'
 import Markdown from "react-markdown";
 import myStyle from '../markdown-style.module.css'
+import Cookies from 'js-cookie';
 
 function TextPage() {
-    console.log(window.location.search.substring(4));
+    const id = window.location.search.substring(4);
     const serverHelper = new ServerHelper();
     const client = new Client();
-    // const [mas, setData] = useState("");
     const index = window.location.search.substring(4);
 
     const [req, setReq] = useState({
@@ -29,23 +28,14 @@ function TextPage() {
         updatedAt: "",
         publishedAt: "",
         users_like: "",
-        images: ""
+        images: null
     } as IRequest);
 
     useEffect(() => {
         async function fetchData() {
             try {
-                const content = await client.getAllData()
-                const data = serverHelper.sortByTime(content);
-                console.log(data[0].base);
-                // if (!index) setData(data[Number(Cookies.get('id'))].Base);
-                if (index) {
-                    setReq(data[Number(index)]);
-                    // setData(data[Number(window.location.search.substring(4))].Base);
-                }
-                else {
-                    setReq({ label: "Error" } as IRequest);
-                }
+                const content = await client.getFromId(Number(id));
+                setReq(content);
             } catch (error) {
                 console.log('ERROR: ' + error);
             }
@@ -54,12 +44,11 @@ function TextPage() {
     }, []);
     document.title = req.label;
     const navigate = useNavigate();
-    console.log(req.base)
     return <div>
         <Navbar expand="lg" style={{ backgroundColor: "rgba(215, 236, 255, 1)" }}>
             <Nav className="container-fluid">
                 <Nav.Item style={{ paddingLeft: 10 }}>
-                    <Button onClick={() => { navigate("/", { replace: true }) }} style={{
+                    <Button onClick={() => { navigate("/", { replace: false }) }} style={{
                         margin: 1,
                         backgroundColor: "rgba(164, 212, 255, 1)"
                     }}>
@@ -74,7 +63,7 @@ function TextPage() {
                     paddingLeft: 20, paddingRight: 20, paddingTop: 10,
                     borderRadius: 30, borderWidth: 10, paddingBottom: 10
                 }}
-                src={req.images["data"] != null ? "http://localhost:1337" + (req.images["data"][0]["attributes"] as ImageRequest).url : ""} />
+                src={req.images != null ? "http://localhost:1337" + (req.images["data"][0]["attributes"] as ImageRequest).url : ""} />
             <h2 style={{ paddingLeft: 20, paddingRight: 20, fontWeight: 'bold', fontSize: 50 }}>{req.label}</h2>
             <Markdown className={myStyle.reactMarkDown}
                 children={req.base}/>
