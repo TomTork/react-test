@@ -18,7 +18,7 @@ class ServerHelper {
     sortBySearch(mas: IRequest[], query: string) {
         const massive = [];
         for (let i = 0; i < mas.length; i++) {
-            if (mas[i].base.includes(query) || mas[i].label.includes(query)) {
+            if (mas[i].base.toLowerCase().includes(query.toLowerCase()) || mas[i].label.toLowerCase().includes(query.toLowerCase())) {
                 massive.push(mas[i]);
             }
         }

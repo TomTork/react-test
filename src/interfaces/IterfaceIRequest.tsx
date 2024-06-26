@@ -1,4 +1,5 @@
 interface IRequest {
+    id: number,
     label: string,
     base: string,
     likes: number,
@@ -7,7 +8,7 @@ interface IRequest {
     createdAt: string,
     updatedAt: string,
     publishedAt: string,
-    users_like: string,
+    users_like?: string,
     images?: any
 }
 //0 - poems, 1 - stories, 2 - articles

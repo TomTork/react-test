@@ -17,7 +17,7 @@ import { useNavigate } from "react-router-dom";
 import Cookies from 'js-cookie';
 import ServerHelper from "./components/HelperForServer";
 import { v4 as uuidv4 } from 'uuid';
-import { TextField } from "@mui/material";
+import { Alert, TextField } from "@mui/material";
 import cancelImage from './assets/cancel.svg';
 import ImageRequest from "./interfaces/InterfaceImageRequest";
 import Markdown from "react-markdown";
@@ -36,45 +36,56 @@ function App() {
   const [mas, setData] = useState(Array);
   const [globalMas, setGlobalMas] = useState(Array)
   const [searchInput, setSearchInput] = useState('');
-  // const handleSearchInput = (x: string) => { setSearchInput(x) };
   const [showSearch, setShowSearch] = useState(false);
   const handleSearch = (x: boolean) => { setShowSearch(!x) };
-  const [updateSort, setUpdateSort] = useState(false);
+  const [visibilityAlert, setVisibilityAlert] = useState(false);
 
   let rawData: IRequest[] = [];
-  const [chStories, setChS] = useState(false);
-  const [chArticles, setChA] = useState(false);
-  const [chPoems, setChP] = useState(false);
+  const type = window.location?.search?.substring(6);
+  const [chPoems, setChP] = useState(type === "0" ? true : false);
+  const [chStories, setChS] = useState(type === "1" ? true : false);
+  const [chArticles, setChA] = useState(type === "2" ? true : false);
 
   document.title = "Том Торк";
   if (!Cookies.get('token')) { //token for new user
     Cookies.set('token', uuidv4());
   }
-  else console.log(Cookies.get('token'));
-
   const navigate = useNavigate();
-
-  if(updateSort){
-    useEffect(() => {
-      async function fetchData2() {
-        console.log('start!');
-        if(chPoems) setData(serverHelper.SplitMassive(await client.getAllFromType(0)));
-        if(chStories) setData(serverHelper.SplitMassive(await client.getAllFromType(1)));
-        if(chArticles) setData(serverHelper.SplitMassive(await client.getAllFromType(2)));  
-        setUpdateSort(false);
-      }
-      fetchData2();
-    }, []);
-  }
 
   useEffect(() => {
     async function fetchData() {
       try {
-        const content = await client.getAllData();
-        console.log(content);
-        rawData = serverHelper.sortByTime(content);
-        setGlobalMas(rawData)
-        setData(serverHelper.SplitMassive(rawData));
+        switch(type){
+          case "0": {
+            const content = (await client.getAllFromType(0));
+            rawData = serverHelper.sortByTime(content);
+            setGlobalMas(rawData);
+            setData(serverHelper.SplitMassive(content));
+            break;
+          }
+          case "1": {
+            const content = (await client.getAllFromType(1));
+            rawData = serverHelper.sortByTime(content);
+            setGlobalMas(rawData);
+            setData(serverHelper.SplitMassive(content));
+            break;
+          }
+          case "2": {
+            const content = (await client.getAllFromType(2));
+            rawData = serverHelper.sortByTime(content);
+            setGlobalMas(rawData);
+            setData(serverHelper.SplitMassive(content));
+            break;
+          }
+          default: {
+            const content = await client.getAllData();
+            rawData = serverHelper.sortByTime(content);
+            setGlobalMas(rawData);
+            setData(serverHelper.SplitMassive(rawData));
+            break;
+          }
+        }
+        
       } catch (error) {
         console.log('MY-ERROR: ' + error);
       }
@@ -84,7 +95,8 @@ function App() {
 
 
   return <div>
-    <Navbar expand="lg" style={{ backgroundColor: "rgba(215, 236, 255, 1)" }}>
+    <Navbar className="fixed-top" expand="lg" style={{ backgroundColor: "rgba(215, 236, 255, 1)" }}>
+      <Col>
       <Nav className="container-fluid">
         <Nav.Item className="ml-auto" style={{ paddingLeft: 10 }}>
           <Button onClick={handleShow} style={{
@@ -111,28 +123,53 @@ function App() {
                 <FormControlLabel checked={chPoems} onClick={() => { setChP(!chPoems); setChS(false); setChA(false) }}
                   className="d-flex justify-content-between" control={<Android12Switch />}
                   style={{ display: "flex", justifyContent: "end", paddingRight: 20, paddingTop: 10 }}
-                  label={<span style={{ fontSize: 20, fontStyle: 'oblique' }}>Поэмы</span>} value="end" labelPlacement="start" />
+                  label={<span style={{ fontSize: 20, fontStyle: 'oblique' }}>Поэмы / стихи</span>} value="end" labelPlacement="start" />
               </FormGroup>
               <Button style={{
                 display: "flex", justifyContent: "center", backgroundColor: "rgba(164, 212, 255, 1)", 
                 borderColor: "rgba(0, 0, 0)", marginLeft: 10, marginTop: 10
-              }} onClick={() => { setShow(false); setUpdateSort(true) }}>
+              }} onClick={() => { 
+                setShow(false)
+                let value = 0;
+                switch(true){
+                  case chStories: {
+                    value = 1;
+                    navigate('/?type=' + value.toString(), { replace: false });
+                    break;
+                  }
+                  case chArticles: {
+                    value = 2;
+                    navigate('/?type=' + value.toString(), { replace: false });
+                    break;
+                  }
+                  case chPoems: {
+                    value = 0;
+                    navigate('/?type=' + value.toString(), { replace: false });
+                    break;
+                  }
+                  default: {
+                    navigate("/", { replace: false });
+                    break;
+                  }
+                }
+                window.location.reload();
+                }}>
                 <a style={{color: "rgba(0, 0, 0)"}}>Применить</a>
               </Button>
             </Offcanvas.Body>
           </Offcanvas>
         </Nav.Item>
         <Nav.Item>
-          <p className="text-start; fs-2" style={{ paddingLeft: 260, margin: 1, fontFamily: 'fantasy' }}>
+          <p className="text-start; fs-2" style={{ position: 'absolute', alignContent: 'center', paddingLeft: 10, fontFamily: 'fantasy' }}>
             Том Торк — рассказы, стихи и статьи
           </p>
         </Nav.Item>
-        <Nav.Item className="ml-auto">
-          {<TextField className="content-wrapper"
+        <Nav.Item style={{position: 'absolute', right: 0, paddingRight: 10}}>
+          {<TextField className="content-wrapper" size="small"
             value={searchInput}
             style={{
               visibility: showSearch ? 'visible' : 'hidden',
-              paddingRight: 20, marginBottom: 10
+              paddingRight: 10, paddingTop: 5
             }}
             onChange={
               (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -144,9 +181,10 @@ function App() {
               endAdornment: (
                 <Button style={{
                   visibility: searchInput != '' ? 'visible' : 'hidden',
-                  backgroundColor: "rgba(0, 0, 0, 0)", borderColor: "rgba(0, 0, 0, 0)"
+                  backgroundColor: "rgba(0, 0, 0, 0)", borderColor: "rgba(0, 0, 0, 0)",
+                  alignContent: 'center'
                 }}>
-                  <img src={cancelImage} width={25} height={25}
+                  <img src={cancelImage} width={20} height={20}
                     onClick={() => {
                       setSearchInput('');
                     }}
@@ -162,15 +200,19 @@ function App() {
               borderBlockColor: "rgba(0, 0, 0, 0)",
               borderBottomColor: "rgba(0, 0, 0, 0)",
               borderColor: "rgba(0, 0, 0, 0)",
-              margin: 1
             }}>
             <img src={searchImage} width={30} height={30} />
           </Button>
         </Nav.Item>
       </Nav>
-    </Navbar>
+      { visibilityAlert? <Alert sx={{ bgcolor: '#ecfce0' }}
+       severity="success" variant="outlined"
+        style={{marginTop: 10, marginLeft: 20, marginRight: 20}}>Ссылка скопирована успешно!</Alert> : null }
+      </Col>
 
-    <Container>
+      
+    </Navbar>
+    <Container style={{position: 'relative', paddingTop: 70}}>
       {
         mas.map((item: any, index: number) => (
           <Row>
@@ -178,13 +220,13 @@ function App() {
               item.map((itemIn: IRequest, indexIn: number) => (
                 <Col>
                   <Card className="mt-4" style={{height: 350}}>
-                    <Card.Img variant="top" src={itemIn.images["data"] != null ? "http://localhost:1337" + (itemIn.images["data"][0]["attributes"] as ImageRequest).url : ""} />
+                    <Card.Img variant="top" src={itemIn.images != null ? "http://localhost:1337" + (itemIn.images["data"][0]["attributes"] as ImageRequest).url : ""} />
                     <Card.Body>
                       <Card.Title style={{paddingLeft: 20}}><h3>{serverHelper.toTypeValue(itemIn.label)}</h3></Card.Title>
                       <Card.Text
                         onClick={() => {
-                          Cookies.set('id', (index * 3 + indexIn).toString());
-                          navigate('/text' + "/?id=" + Cookies.get('id'), { replace: true });
+                          Cookies.set('id', itemIn.id.toString());
+                          navigate('/text' + "/?id=" + itemIn.id, { replace: false });
                         }}
                         style={{ whiteSpace: 'pre-wrap' }}>
                         <Markdown className={myStyle.reactMarkDown} children={serverHelper.toTypeContent(itemIn.base) + "..."}/>
@@ -196,7 +238,10 @@ function App() {
                         
                         <Button className="center"
                           key={"like" + Number(index.toString() + indexIn.toString())}
-                          onClick={() => { console.log("like " + Number(index.toString() + indexIn.toString())) }}
+                          onClick={() => {
+                            console.log(Cookies.get('token')!!)
+                            client.addLike(Cookies.get('token')!!, itemIn.id);
+                          }}
                           style={{
                             backgroundColor: (colorHeartIndex === Number(index.toString() + indexIn.toString()) ? "rgba(164, 212, 255, 0.5)" : "rgba(164, 212, 255, 1)"),
                             borderColor: "rgba(0, 0, 0)"
@@ -207,7 +252,14 @@ function App() {
                         </Button>
                         <Button className="center"
                           key={"share" + Number(index.toString() + indexIn.toString())}
-                          onClick={() => { console.log("share " + Number(index.toString() + indexIn.toString()) + " " + colorShareIndex) }}
+                          onClick={() => { 
+                            navigator.clipboard.writeText(window.location.host + "/text/?id=" + itemIn.id);
+                            setVisibilityAlert(true);
+                            setTimeout(() => {
+                              setVisibilityAlert(false);
+                            }, 1000);
+                            
+                          }}
                           style={{
                             backgroundColor: (colorShareIndex === Number(index.toString() + indexIn.toString()) ? "rgba(164, 212, 255, 0.5)" : "rgba(164, 212, 255, 1)"),
                             borderColor: "rgba(0, 0, 0)"
@@ -224,8 +276,7 @@ function App() {
           </Row>
         ))
       }
-    </Container >
-
+    </Container>
     <h5 style={{
       display: "flex", justifyContent: "center", backgroundColor: "rgba(164, 212, 255, 0.5)",
       marginLeft: 312, marginRight: 312, borderEndStartRadius: 10, borderEndEndRadius: 10

@@ -17,11 +17,13 @@
     "bootstrap": "^5.3.3",
     "js-cookie": "^3.0.5",
     "react": "^18.3.1",
+    "react-async": "^10.0.1",
     "react-bootstrap": "^2.10.2",
     "react-dom": "^18.2.0",
     "react-markdown": "^9.0.1",
     "react-quill": "^2.0.0",
     "react-router-dom": "^6.23.1",
+    "sha512-crypt-ts": "^0.1.27",
     "uuid": "^9.0.1"
   },
   "devDependencies": {
