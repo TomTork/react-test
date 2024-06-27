@@ -14,9 +14,8 @@ import Cookies from 'js-cookie';
 
 function TextPage() {
     const id = window.location.search.substring(4);
-    const serverHelper = new ServerHelper();
+    // const serverHelper = new ServerHelper();
     const client = new Client();
-    const index = window.location.search.substring(4);
 
     const [req, setReq] = useState({
         label: "",

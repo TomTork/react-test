@@ -1,4 +1,6 @@
+import { ExceptionMap } from "antd/es/result";
 import IRequest from "../interfaces/IterfaceIRequest";
+import { Strapi } from "@strapi/strapi";
 
 class Client {
     urlServer = "http://localhost:1337/";
@@ -131,7 +133,31 @@ class Client {
         else if(data != null) return data;
         return "";
     }
-    async sendNewData(label: string, value: string, token: string){}
+    async sendNewData(label: string, value: string, type: number, token: string){
+        try {
+            const headers = new Headers();
+            headers.set('Content-Type', 'application/json');
+            headers.set('Accept', 'application/json');
+            headers.set('Authorization', 'Bearer ' + token);
+            fetch(this.urlServer + "api/contents", {
+                method: 'POST',
+                headers: headers,
+                body: JSON.stringify({"data": {
+                    "label": label,
+                    "base": value,
+                    "likes": 0,
+                    "release_date": new Date(),
+                    "type": type,
+                    "users_like": ""
+                }})
+            })
+            .then(response => response.json())
+            .then(data => console.log(data));
+        } catch (e){
+            console.log(e);
+        }
+        
+    }
 }
 
 export default Client;

@@ -13,6 +13,7 @@
     "@emotion/react": "^11.11.4",
     "@emotion/styled": "^11.11.5",
     "@mui/material": "^5.15.20",
+    "@strapi/strapi": "^4.25.1",
     "antd": "^5.17.4",
     "bootstrap": "^5.3.3",
     "js-cookie": "^3.0.5",
